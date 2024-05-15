@@ -1,9 +1,8 @@
 var express = require('express');
 var router = express.Router();
+const linkController = require('../controllers/linkController');
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
-    res.json({ price: 10.99 });
-});
+router.post('/', linkController.createLink);
 
 module.exports = router;
