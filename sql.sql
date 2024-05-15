@@ -3,7 +3,8 @@ USE compraspy;
 
 CREATE TABLE compras (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    id_produto INT NOT NULL,
+    id_produto INT NOT NULL PRIMARY KEY,
     link_compras VARCHAR(255) NOT NULL,
+    preco FLOAT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
