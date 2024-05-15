@@ -1,5 +1,4 @@
 require('dotenv').config();
-const Connection = require('../database/dbConnect');
 const mysql = require('mysql');
 
 // Cria um pool de conexões
