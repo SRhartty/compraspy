@@ -6,7 +6,7 @@ var logger = require('morgan');
 var cron = require('node-cron');
 const cronJob = require('./cron/cron');
 
-cron.schedule('*/5 * * * * *', () => {
+cron.schedule('*/10 * * * * *', () => {
   cronJob.cronJob();
 });
 

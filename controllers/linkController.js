@@ -9,9 +9,10 @@ exports.createLink = async (req, res) => {
     const id_produto = req.body.id_produto;
     const link_compras = req.body.link;
     const preco = req.body.preco;
+    const current_status = 'aguardando';
 
     const checkQuery = `SELECT COUNT(*) AS count FROM compraspy.compras WHERE id_produto = ?`;
-    const insertQuery = `INSERT INTO compraspy.compras (id_produto, link_compras, preco) VALUES (?, ?, ?)`;
+    const insertQuery = `INSERT INTO compraspy.compras (id_produto, link_compras, preco, current_status) VALUES (?, ?, ?, ?)`;
     const updateQuery = `UPDATE compraspy.compras SET link_compras = ?, preco = ? WHERE id_produto = ?`;
 
     try {
@@ -48,7 +49,7 @@ exports.createLink = async (req, res) => {
                     });
                 } else {
                     // Insere um novo registro
-                    connection.query(insertQuery, [id_produto, link_compras, preco], (err, result) => {
+                    connection.query(insertQuery, [id_produto, link_compras, preco, current_status], (err, result) => {
                         if (err) {
                             console.log(err);
                             res.status(500).json({ message: 'Erro interno do servidor' });

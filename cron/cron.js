@@ -1,5 +1,4 @@
 const puppeteer = require('puppeteer');
-
 const mysqlPool = require('../exports/mysqlPool');
 
 exports.cronJob = function () {
@@ -9,7 +8,9 @@ exports.cronJob = function () {
             return;
         }
 
-        const query = `SELECT id_produto, link_compras FROM compraspy.compras`;
+        const query = `SELECT link_compras FROM compraspy.compras ORDER BY updated_at ASC LIMIT 1`;
+        const updateQuery = `UPDATE compraspy.compras SET current_status = ? WHERE id_produto = ?`;
+
         connection.query(query, (err, results) => {
             if (err) {
                 console.log(err);
@@ -17,11 +18,9 @@ exports.cronJob = function () {
                 return;
             }
 
-            console.log('Executando a tarefa agendada');
-            screaping(results[0].link_compras);
+            console.log(results[0].link_compras);
             connection.release();
-
-
+            return results;
         });
     });
 };
@@ -31,16 +30,17 @@ async function screaping(link_compras) {
     const page = await browser.newPage();
 
     // Navigate the page to a URL
-    await page.goto(link_compras);
+    await page.goto(link_compras, { waitUntil: 'domcontentloaded'});
 
-    // Set screen size
-    await page.setViewport({ width: 100, height: 100 });
-    
     //pegar preço do produto
     const price = await page.evaluate(() => {
-        return document.querySelector('.header-product-info--price', 'span').innerText;
+        const priceElements = document.querySelectorAll(".header-product-info--price span");
+        const firstPrice = priceElements[0].textContent.trim();
+        const numericPrice = firstPrice.replace('US$ ', '');
+        return numericPrice;
     });
     console.log(price);
     await browser.close();
+    return price;
 };
 
