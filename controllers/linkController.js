@@ -1,14 +1,4 @@
-require('dotenv').config();
-const mysql = require('mysql');
-
-// Cria um pool de conexões
-const pool = mysql.createPool({
-    connectionLimit: 10,
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE
-});
+const mysqlPool = require('../exports/mysqlPool');
 
 exports.createLink = async (req, res) => {
     if (req.headers.authorization !== process.env.API_KEY) {
@@ -26,7 +16,7 @@ exports.createLink = async (req, res) => {
 
     try {
         // Obtém uma conexão do pool
-        pool.getConnection((err, connection) => {
+        mysqlPool.pool.getConnection((err, connection) => {
             if (err) {
                 console.log(err);
                 res.status(500).json({ message: 'Erro interno do servidor' });
