@@ -20,6 +20,11 @@ exports.cronJob = async function () {
                 connection.release();
                 return;
             }
+            if (results[0].count === 0) {
+                connection.release();
+                console.log('Nenhum produto para atualizar');
+                return;
+            }
             if (results[0].count < 10 ) {
                 connection.query(query, async (err, results) => {
                     if (err) {
