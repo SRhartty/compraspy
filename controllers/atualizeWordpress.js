@@ -3,13 +3,14 @@ const woocommerce = require('../exports/woocommerce');
 //process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 exports.atualizeWordpress = async (regular_price, id_produto) => {
-     regular_price = parseFloat(regular_price);
-   woocommerce.WooCommerce.post(`products/${id_produto}`, {
+     
+   woocommerce.WooCommerce.put(`products/${parseFloat(id_produto)}`, {
          regular_price: regular_price
     }, function(err, data, res) {
          if (err) {
               console.log(err);
               return;
          }
+         console.log(res);
     });
 }
