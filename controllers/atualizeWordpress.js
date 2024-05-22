@@ -10,5 +10,6 @@ exports.atualizeWordpress = async (regular_price, id_produto) => {
               console.log(err);
               return;
          }
+         console.log(res);
     });
 }
