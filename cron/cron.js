@@ -20,44 +20,41 @@ exports.cronJob = async function () {
                 connection.release();
                 return;
             }
-            if (results[0].count === 0) {
+            if (results[0].count > 10) {
                 connection.release();
-                console.log('Nenhum produto para atualizar');
+                console.log('agurade a fila ser processada');
                 return;
             }
-            if (results[0].count < 10 ) {
-                connection.query(query, async (err, results) => {
+
+            connection.query(query, async (err, results) => {
+                if (err) {
+                    console.log(err);
+                    connection.release();
+                    return;
+                }
+
+                connection.query(updateQuery, ['processando', results[0].id_produto], (err) => {
                     if (err) {
                         console.log(err);
-                        connection.release();
                         return;
                     }
+                });
 
-                    connection.query(updateQuery, ['processando', results[0].id_produto], (err) => {
-                        if (err) {
-                            console.log(err);
-                            return;
-                        }
-                    });
+                let preco_compras = await screaping(results[0].link_compras);
 
-                    let preco_compras = await screaping(results[0].link_compras);
+                if (parseFloat(preco_compras) !== parseFloat(results[0].preco)) {
+                    WooCommerceAPI.atualizeWordpress(preco_compras, results[0].id_produto);
+                    func_atualizeDatabase.atualizeDatabase(preco_compras, results[0].id_produto);
+                }
 
-                    if (parseFloat(preco_compras) !== parseFloat(results[0].preco)) {
-                        WooCommerceAPI.atualizeWordpress(preco_compras, results[0].id_produto);
-                        func_atualizeDatabase.atualizeDatabase(preco_compras, results[0].id_produto);
+                connection.query(updateQuery, ['aguardando', results[0].id_produto], (err) => {
+                    if (err) {
+                        console.log(err);
+                        return;
                     }
-
-                    connection.query(updateQuery, ['aguardando', results[0].id_produto], (err) => {
-                        if (err) {
-                            console.log(err);
-                            return;
-                        }
-                    });
-                    connection.release();
-                });  
-            } else {
+                });
                 connection.release();
-            }
+            });
         });
     });
 };
