@@ -54,6 +54,7 @@ exports.cronJob = async function () {
                     let preco_compras = await screaping(results[0].link_compras);
     
                     if (parseFloat(preco_compras) !== parseFloat(results[0].preco)) {
+                        console.log('Preço alterado');
                         WooCommerceAPI.atualizeWordpress(preco_compras, results[0].id_produto);
                         func_atualizeDatabase.atualizeDatabase(preco_compras, results[0].id_produto);
                     }
