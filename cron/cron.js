@@ -10,6 +10,7 @@ exports.cronJob = async function () {
             return;
         }
 
+        const countQuery = `SELECT COUNT(*) AS count FROM compraspy.compras`;
         const checkQuery = `SELECT COUNT(*) AS count FROM compraspy.compras WHERE current_status = 'processando'`;
         const query = `SELECT id_produto, link_compras, preco FROM compraspy.compras WHERE current_status = 'aguardando' ORDER BY updated_at ASC LIMIT 1`;
         const updateQuery = `UPDATE compraspy.compras SET current_status = ? WHERE id_produto = ?`;
@@ -26,34 +27,48 @@ exports.cronJob = async function () {
                 return;
             }
 
-            connection.query(query, async (err, results) => {
+            connection.query(countQuery, (err, results) => {
                 if (err) {
                     console.log(err);
                     connection.release();
                     return;
                 }
 
-                connection.query(updateQuery, ['processando', results[0].id_produto], (err) => {
-                    if (err) {
-                        console.log(err);
-                        return;
-                    }
-                });
-
-                let preco_compras = await screaping(results[0].link_compras);
-
-                if (parseFloat(preco_compras) !== parseFloat(results[0].preco)) {
-                    WooCommerceAPI.atualizeWordpress(preco_compras, results[0].id_produto);
-                    func_atualizeDatabase.atualizeDatabase(preco_compras, results[0].id_produto);
+                if (results[0].count === 0) {
+                    connection.release();
+                    console.log('Nenhum produto para ser processado');
+                    return;
                 }
 
-                connection.query(updateQuery, ['aguardando', results[0].id_produto], (err) => {
+                connection.query(query, async (err, results) => {
                     if (err) {
                         console.log(err);
+                        connection.release();
                         return;
                     }
+    
+                    connection.query(updateQuery, ['processando', results[0].id_produto], (err) => {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        }
+                    });
+    
+                    let preco_compras = await screaping(results[0].link_compras);
+    
+                    if (parseFloat(preco_compras) !== parseFloat(results[0].preco)) {
+                        WooCommerceAPI.atualizeWordpress(preco_compras, results[0].id_produto);
+                        func_atualizeDatabase.atualizeDatabase(preco_compras, results[0].id_produto);
+                    }
+    
+                    connection.query(updateQuery, ['aguardando', results[0].id_produto], (err) => {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        }
+                    });
+                    connection.release();
                 });
-                connection.release();
             });
         });
     });
