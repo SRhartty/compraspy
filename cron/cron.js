@@ -6,50 +6,43 @@ const func_atualizeDatabase = require('../controllers/atualizeDatabase');
 exports.cronJob = async function () {
     mysqlPool.pool.getConnection((err, connection) => {
         if (err) {
-            console.log(err);
             return;
         }
 
-        const countQuery = `SELECT COUNT(*) AS count FROM compraspy.compras`;
+        const countQuery = `SELECT COUNT(*) AS count FROM compraspy.compras WHERE current_status = 'aguardando'`;
         const checkQuery = `SELECT COUNT(*) AS count FROM compraspy.compras WHERE current_status = 'processando'`;
         const query = `SELECT id_produto, link_compras, preco FROM compraspy.compras WHERE current_status = 'aguardando' ORDER BY updated_at ASC LIMIT 1`;
         const updateQuery = `UPDATE compraspy.compras SET current_status = ? WHERE id_produto = ?`;
 
         connection.query(checkQuery, (err, results) => {
             if (err) {
-                console.log(err);
                 connection.release();
                 return;
             }
             if (results[0].count > 10) {
                 connection.release();
-                console.log('agurade a fila ser processada');
                 return;
             }
 
             connection.query(countQuery, (err, results) => {
                 if (err) {
-                    console.log(err);
                     connection.release();
                     return;
                 }
 
                 if (results[0].count === 0) {
                     connection.release();
-                    console.log('Nenhum produto para ser processado');
                     return;
                 }
 
                 connection.query(query, async (err, results) => {
                     if (err) {
-                        console.log(err);
                         connection.release();
                         return;
                     }
-    
+                    
                     connection.query(updateQuery, ['processando', results[0].id_produto], (err) => {
                         if (err) {
-                            console.log(err);
                             return;
                         }
                     });
@@ -63,7 +56,6 @@ exports.cronJob = async function () {
     
                     connection.query(updateQuery, ['aguardando', results[0].id_produto], (err) => {
                         if (err) {
-                            console.log(err);
                             return;
                         }
                     });
