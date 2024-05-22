@@ -15,6 +15,7 @@ exports.cronJob = async function () {
         const updateQuery = `UPDATE compraspy.compras SET current_status = ? WHERE id_produto = ?`;
 
         connection.query(checkQuery, (err, results) => {
+            console.log("check1");
             if (err) {
                 connection.release();
                 return;
@@ -25,6 +26,7 @@ exports.cronJob = async function () {
             }
 
             connection.query(countQuery, (err, results) => {
+                console.log("check2");
                 if (err) {
                     connection.release();
                     return;
@@ -36,12 +38,14 @@ exports.cronJob = async function () {
                 }
 
                 connection.query(query, async (err, results) => {
+                    console.log("check3");
                     if (err) {
                         connection.release();
                         return;
                     }
                     
                     connection.query(updateQuery, ['processando', results[0].id_produto], (err) => {
+                        console.log("check4");
                         if (err) {
                             return;
                         }
@@ -55,6 +59,7 @@ exports.cronJob = async function () {
                     }
     
                     connection.query(updateQuery, ['aguardando', results[0].id_produto], (err) => {
+                        console.log("check5");
                         if (err) {
                             return;
                         }
