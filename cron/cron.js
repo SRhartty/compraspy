@@ -21,7 +21,7 @@ exports.cronJob = async function () {
                     connection.release();
                     throw err;
                 }
-                if (results[0].count > 10) {
+                if (results[0].count > 3) {
                     connection.release();
                     throw new Error('Count exceeded');
                 }
