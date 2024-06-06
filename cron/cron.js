@@ -87,10 +87,10 @@ exports.cronJob = async function () {
 
 async function screaping(link_compras) {
     const browser = await puppeteer.launch(
-    // {
-    //     executablePath: '/usr/bin/chromium-browser',
-    //     args: ['--no-sandbox']
-    // }
+    {
+        executablePath: '/usr/bin/chromium-browser',
+        args: ['--no-sandbox']
+    }
     );
     const page = await browser.newPage();
     console.log("abrindo link do compras");
