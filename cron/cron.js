@@ -23,7 +23,7 @@ exports.cronJob = async function () {
                 }
                 if (results[0].count > 3) {
                     connection.release();
-                    throw new Error('Count exceeded');
+                   return;
                 }
 
                 connection.query(countQuery, (err, results) => {
