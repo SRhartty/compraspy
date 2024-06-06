@@ -35,7 +35,7 @@ exports.cronJob = async function () {
 
                     if (results[0].count === 0) {
                         connection.release();
-                        throw new Error('No records found');
+                        return;
                     }
 
                     connection.query(query, async (err, results) => {
@@ -87,10 +87,13 @@ exports.cronJob = async function () {
 
 async function screaping(link_compras) {
     const browser = await puppeteer.launch(
-    {
-        executablePath: '/usr/bin/chromium-browser',
-        args: ['--no-sandbox']
-    }
+        {
+            product: 'firefox'
+        }
+    // {
+    //     executablePath: '/usr/bin/chromium-browser',
+    //     args: ['--no-sandbox']
+    // }
     );
     const page = await browser.newPage();
     console.log("abrindo link do compras");
