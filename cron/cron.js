@@ -9,7 +9,7 @@ exports.cronJob = async function () {
             if (err) {
                 throw err;
             }
-
+            console.log("banco conectado");
             const countQuery = `SELECT COUNT(*) AS count FROM compraspy.compras WHERE current_status = 'aguardando'`;
             const checkQuery = `SELECT COUNT(*) AS count FROM compraspy.compras WHERE current_status = 'processando'`;
             const query = `SELECT id_produto, link_compras, preco FROM compraspy.compras WHERE current_status = 'aguardando' ORDER BY updated_at ASC LIMIT 1`;
@@ -52,7 +52,7 @@ exports.cronJob = async function () {
                                 throw err;
                             }
                         });
-
+                        console.log("inicio do screapy");
                         let preco_compras;
                         try {
                             preco_compras = await screaping(results[0].link_compras);
@@ -86,21 +86,24 @@ exports.cronJob = async function () {
 };
 
 async function screaping(link_compras) {
-    const browser = await puppeteer.launch({
+    const browser = await puppeteer.launch(
+    {
         executablePath: '/usr/bin/chromium-browser',
         args: ['--no-sandbox']
-    });
+    }
+    );
     const page = await browser.newPage();
-
+    console.log("abrindo link do compras");
     await page.goto(link_compras, { waitUntil: 'domcontentloaded' });
 
     //pegar preço do produto
     const price = await page.evaluate(() => {
         const priceElements = document.querySelectorAll(".header-product-info--price span");
-        const firstPrice = priceElements[0].textContent.trim();
+        const firstPrice = priceElements[0].textContent.trim(); 
         const numericPrice = firstPrice.replace('US$ ', '');
         return numericPrice;
     });
+    console.log("preco consultado");
     await browser.close();
     return price;
 };
