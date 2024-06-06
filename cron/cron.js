@@ -88,7 +88,8 @@ exports.cronJob = async function () {
 async function screaping(link_compras) {
     const browser = await puppeteer.launch(
         {
-            product: 'chrome'
+            product: 'chrome',
+            args: ['--no-sandbox']
         }
     // {
     //     executablePath: '/usr/bin/chromium-browser',
